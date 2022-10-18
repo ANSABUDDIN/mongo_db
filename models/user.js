@@ -1,5 +1,6 @@
 import validator from "validator";
 import mongoose from "mongoose";
+
 let date =  new Date().toUTCString();
 
 
@@ -28,7 +29,11 @@ const userSchema = new mongoose.Schema({
     },
     approved : {
         type:Number,
-        default: 1
+        default: 0
+    },
+    otp:{
+        type:Number,
+        default: 0
     },
     createdAt:{
         type:Date,
