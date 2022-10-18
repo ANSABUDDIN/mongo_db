@@ -9,14 +9,7 @@ app.use(express.json())
 app.use(cors())
 
 app.get('/', (req, resp) => {
-    // con.query("select * from user", (err, result) => {
-    //     if (err) {
-    //         resp.send("error")
-    //     }
-    //     else {
-    //         resp.send(result)
-    //     }
-    // })
+    resp.send("Your Node api is run");
 });
 app.post('/register', (req, resp) => {
     const { username, email, password } = req.body
