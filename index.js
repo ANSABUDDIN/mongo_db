@@ -1,23 +1,29 @@
 import express from 'express';
-// import con from './config.js'
 import Jwt from 'jsonwebtoken';
 import cors from 'cors';
 import './config.js';
 import User from './models/user.js';
+import Otp from './models/otp.js';
+import nodemailer from 'nodemailer'
+import pkg from 'bcryptjs';
+
 const app = express()
+const { hashSync, genSaltSync, compareSync } = pkg;
 app.use(express.json())
 app.use(cors())
 
 app.get('/', (req, resp) => {
     resp.send("Your Node api is run");
 });
-app.post('/register', (req, resp) => {
+app.post('/register', async (req, resp) => {
     const { username, email, password } = req.body
     const user = new User({
         username,
         email,
         password
     });
+    const salt = genSaltSync(10);
+    user.password = hashSync(user.password, salt);
     user.save().then(async (data) => {
         const token = await Jwt.sign({ _user: req.body.email }, "thisisupcomingnftsecreatekeyitshouldlong")
         let email = data.email
@@ -28,59 +34,60 @@ app.post('/register', (req, resp) => {
     })
 });
 
-app.post('/login', (req, resp) => {
-    const data = {
-        "email": req.body.email,
-        "password": req.body.password,
-    }
-
-    con.query(`select * from user where email = '${req.body.email}'`, (error, result, field) => {
-        if (result.length == 0) {
-            resp.status(500).send({
-                msg: "Email Incorrect"
-            });
-
-        } else {
-            const token = Jwt.sign(data.email, "thisisupcomingnftsecreatekeyitshouldlong");
-            if (result[0].password == req.body.password) {
-                resp.status(500).send({
-                    msg: "Login",
-                    token: token
-                });
-            }
-            else {
-                resp.status(500).send({
-                    msg: "Password Incorrect"
-                });
-            }
-        }
-    });
-});
-app.post('/forget', (req, resp) => {
-    const data = {
-        "email": req.body.email
-
-    }
-
-    con.query(`select * from user where email = '${req.body.email}'`, (error, result, field) => {
-        if (result.length == 0) {
-            resp.status(500).send({
-                msg: "Email Incorrect"
-            });
-
-        } else {
-            const otp = Math.floor(1000 + Math.random() * 9000);
-            con.query(`UPDATE user set otp = '${otp}' WHERE email = '${req.body.email}'`, (error, result, field) => {
-                resp.status(200).send({
-                    msg: "Otp Generate Sucessfully"
-
-                });
-
-
+app.post('/login', async (req, resp) => {
+    if (req.body.password && req.body.email) {
+        let user = await User.findOne(req.body).select("-password")
+        // console.log(pass)
+        // var passwordmatch = compareSync(req.body.password, user);
+        const token = await Jwt.sign({ _user: req.body.email }, "thisisupcomingnftsecreatekeyitshouldlong")
+        if (user) {
+            resp.status(200).send({
+                Email: user.email,
+                token: token
             })
+        } else {
+            resp.send({
+                result: "No User Found !"
+            })
+
         }
-    });
+    } else {
+        res.send("Enter Email Or Password")
+
+    }
 });
+
+
+app.post('/forget', async (req, resp) => {
+    let data = await User.findOne({ email: req.body.email });
+    if (data) {
+        const otpcode = Math.floor(1000 + Math.random() * 9000);
+        const otpdata = new Otp({
+            email: req.body.email,
+            code: otpcode,
+            expireIn: new Date().getTime() + 300 * 1000
+        });
+        let otpresponse = await otpdata.save();
+       
+        resp.status(200).send({
+            result: "Please Cheak Your Email Id"
+        })
+
+    } else {
+        resp.status(500).send({
+            result: "Email Not Found"
+        })
+    }
+});
+
+
+// mailer fun
+
+
+
+
+
+
 
 
 // app.post('/register', (req, res) => {
@@ -99,6 +106,31 @@ app.post('/forget', (req, resp) => {
 //         res.send(e)
 //     })
 // })
+
+
+const mymailer = () => {
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: 'ansabuddin0346gmail.com',
+            pass: 'alhouotwxqmxhcmw'
+        }
+    });
+    const mailOptions = {
+        from: 'ansabuddin0346gmail.com',
+        to: 'ansabuddin0346gmail.com',
+        subject: 'Subject',
+        text: 'Email content'
+    };
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            console.log(error);
+        } else {
+            console.log('Email sent: ' + info.response);
+            // do something useful
+        }
+    });
+}
 
 
 const PORT = process.env.PORT || 5000;
