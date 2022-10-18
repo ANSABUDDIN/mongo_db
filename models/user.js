@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema({
         minlength: 5,
         maxlength: 100
     },
-    approved : {
+    status : {
         type:Number,
         default: 0
     },
