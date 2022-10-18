@@ -19,14 +19,20 @@ app.get('/', (req, resp) => {
     // })
 });
 app.post('/register', (req, resp) => {
-    console.log(req.body)
-   const data = new User(req.body)
-   data.save().then(()=>{
-    resp.send(data);
-   }).catch((e)=>{
-    resp.send(e);
-
-   })
+    const { username, email, password } = req.body
+    const user = new User({
+        username,
+        email,
+        password
+    });
+    user.save().then(async (data) => {
+        const token = await Jwt.sign({ _user: req.body.email }, "thisisupcomingnftsecreatekeyitshouldlong")
+        let email = data.email
+        const data_with_token = { email, token, code: 200 }
+        resp.status(200).send(data_with_token)
+    }).catch((e) => {
+        resp.send(e)
+    })
 });
 
 app.post('/login', (req, resp) => {
