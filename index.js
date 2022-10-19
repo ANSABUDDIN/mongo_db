@@ -114,13 +114,6 @@ app.post('/forget', async (req, resp) => {
 
 // mailer fun
 
-
-
-
-
-
-
-
 // app.post('/register', (req, res) => {
 //     const { name, email, password } = req.body
 //     const user = new User({
