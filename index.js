@@ -29,8 +29,8 @@ app.use(cors())
 
 
 app.get('/', (req, resp) => {
-    const newdata = User.find()
-    resp.send(newdata);
+    
+    resp.send("node server is run");
 });
 app.post('/register', async (req, resp) => {
     const { username, email, password } = req.body
