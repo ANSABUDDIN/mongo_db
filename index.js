@@ -29,7 +29,7 @@ app.use(cors())
 
 
 app.get('/', (req, resp) => {
-    
+
     resp.send("node server is run");
 });
 app.post('/register', async (req, resp) => {
@@ -39,62 +39,58 @@ app.post('/register', async (req, resp) => {
         email,
         password
     });
-    // const salt = genSaltSync(10);
-    // user.password = hashSync(user.password, salt);
     user.save().then(async (data) => {
         const token = await Jwt.sign({ _user: req.body.email }, "thisisupcomingnftsecreatekeyitshouldlong")
         let email = data.email
-        const data_with_token = { email, token, code: 200 }
-        resp.status(200).send(data_with_token)
+        // const data_with_token = { email,
+        //      token, code: 200 }
+        resp.status(200).send({
+            token: token,
+            email: email,
+            status: true,
+            mess: "User Register"
+
+        });
     }).catch((e) => {
-        resp.send(e)
+        resp.send(
+            {
+                error: e,
+                status: true,
+                mess: "User Not Register Try Again"
+            }
+        )
     })
 });
 app.post('/kyc', async (req, resp) => {
-    const { adharcard, pancard, phonenumber } = req.body;
-
     User.updateOne(
         { email: req.body.email },
         {
-            $set: { phonenum: "2323232530" , pancard: "0333230" , adharcard : "656233226326313" }
+            $set: { phonenum: req.body.phonenum, pancard: req.body.pancard, adharcard: req.body.adharcard, name: req.body.name }
         }
     ).then(result => {
-        if(result.matchedCount == 0){
+        if (result.matchedCount == 0) {
             resp.status(500).send({
                 result: result,
-                mess:"no user match"
-    
-            })
+                status: false,
+                mess: "No Email Found"
+
+            });
         }
-        if(result.matchedCount == 1){
+        if (result.matchedCount == 1) {
             resp.status(500).send({
                 result: result,
-                mess:"user match"
-    
-            })
+                status: true,
+                mess: "user match"
+
+            });
         }
-        
     }).catch(error => {
         resp.status(500).send({
             error: error,
-            mess:"invalid Req"
+            mess: "invalid Req"
 
-        })
+        });
     })
-    // console.log(result)
-    // if(!result){
-    //     resp.status(200).send({
-    //         Email: "Data Submit" ,
-
-    //     }) 
-    // }else{
-    //     resp.send({
-    //         result: "No User Found !"
-    //     })
-    // }
-
-
-
 });
 app.post('/login', async (req, resp) => {
     if (req.body.password && req.body.email) {
@@ -105,17 +101,17 @@ app.post('/login', async (req, resp) => {
         if (user) {
             resp.status(200).send({
                 Email: user.email,
-                token: token
-            })
+                token: token,
+                status: true,
+                mess: "User Login"
+            });
         } else {
             resp.send({
                 result: "No User Found !"
             })
-
         }
     } else {
-        res.send("Enter Email Or Password")
-
+        resp.send("Enter Email Or Password")
     }
 });
 app.post('/forget', async (req, resp) => {
@@ -131,12 +127,12 @@ app.post('/forget', async (req, resp) => {
 
         resp.status(200).send({
             result: "Please Cheak Your Email Id"
-        })
+        });
 
     } else {
         resp.status(500).send({
             result: "Email Not Found"
-        })
+        });
     }
 });
 
