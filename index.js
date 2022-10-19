@@ -4,13 +4,29 @@ import cors from 'cors';
 import './config.js';
 import User from './models/user.js';
 import Otp from './models/otp.js';
-import nodemailer from 'nodemailer'
+import nodemailer from 'nodemailer';
 import pkg from 'bcryptjs';
+// import passport from 'passport';
+// import googleStragety from 'passport-google-oauth20';
+
+
+
 
 const app = express()
 const { hashSync, genSaltSync, compareSync } = pkg;
+
 app.use(express.json())
 app.use(cors())
+
+
+
+// passport.use(new googleStragety({
+// clientId:
+// }))
+
+
+
+
 
 app.get('/', (req, resp) => {
     resp.send("Your Node api is run");
@@ -22,8 +38,8 @@ app.post('/register', async (req, resp) => {
         email,
         password
     });
-    const salt = genSaltSync(10);
-    user.password = hashSync(user.password, salt);
+    // const salt = genSaltSync(10);
+    // user.password = hashSync(user.password, salt);
     user.save().then(async (data) => {
         const token = await Jwt.sign({ _user: req.body.email }, "thisisupcomingnftsecreatekeyitshouldlong")
         let email = data.email
@@ -32,6 +48,24 @@ app.post('/register', async (req, resp) => {
     }).catch((e) => {
         resp.send(e)
     })
+});
+app.post('/kyc', async (req, resp) => {
+    const { adharcard, pancard, phonenumber } = req.body;
+
+   User.findOne({
+        email: req.body.email,
+        $set: {
+            phonenum:`035263213216`,
+        }
+    }).then(()=>{
+        resp.status(200).send({
+            mess:"updated"
+        })
+    }).catch((e) => {
+        resp.send(e)
+    })
+
+
 });
 
 app.post('/login', async (req, resp) => {
@@ -68,7 +102,7 @@ app.post('/forget', async (req, resp) => {
             expireIn: new Date().getTime() + 300 * 1000
         });
         let otpresponse = await otpdata.save();
-       
+
         resp.status(200).send({
             result: "Please Cheak Your Email Id"
         })
