@@ -29,7 +29,8 @@ app.use(cors())
 
 
 app.get('/', (req, resp) => {
-    resp.send("Your Node api is run");
+    const newdata = User.find()
+    resp.send(newdata);
 });
 app.post('/register', async (req, resp) => {
     const { username, email, password } = req.body
@@ -52,18 +53,46 @@ app.post('/register', async (req, resp) => {
 app.post('/kyc', async (req, resp) => {
     const { adharcard, pancard, phonenumber } = req.body;
 
-   User.findOne({
-        email: req.body.email,
-        $set: {
-            phonenum:`03353126655`,
+    User.updateOne(
+        { email: req.body.email },
+        {
+            $set: { phonenum: "2323232530" , pancard: "0333230" , adharcard : "656233226326313" }
         }
-    }).then(()=>{
-        resp.status(200).send({
-            mess:"updated"
+    ).then(result => {
+        if(result.matchedCount == 0){
+            resp.status(500).send({
+                result: result,
+                mess:"no user match"
+    
+            })
+        }
+        if(result.matchedCount == 1){
+            resp.status(500).send({
+                result: result,
+                mess:"user match"
+    
+            })
+        }
+        
+    }).catch(error => {
+        resp.status(500).send({
+            error: error,
+            mess:"invalid Req"
+
         })
-    }).catch((e) => {
-        resp.send(e)
     })
+    // console.log(result)
+    // if(!result){
+    //     resp.status(200).send({
+    //         Email: "Data Submit" ,
+
+    //     }) 
+    // }else{
+    //     resp.send({
+    //         result: "No User Found !"
+    //     })
+    // }
+
 
 
 });
