@@ -6,27 +6,12 @@ import User from './models/user.js';
 import Otp from './models/otp.js';
 import nodemailer from 'nodemailer';
 import pkg from 'bcryptjs';
-// import passport from 'passport';
-// import googleStragety from 'passport-google-oauth20';
-
-
-
 
 const app = express()
-const { hashSync, genSaltSync, compareSync } = pkg;
+// const { hashSync, genSaltSync, compareSync } = pkg;
 
 app.use(express.json())
 app.use(cors())
-
-
-
-// passport.use(new googleStragety({
-// clientId:
-// }))
-
-
-
-
 
 app.get('/', (req, resp) => {
 
@@ -126,12 +111,16 @@ app.post('/forget', async (req, resp) => {
         let otpresponse = await otpdata.save();
 
         resp.status(200).send({
-            result: "Please Cheak Your Email Id"
+            result: "Please Cheak Your Email Id",
+            status :true 
+
         });
 
     } else {
         resp.status(500).send({
-            result: "Email Not Found"
+            result: "Email Not Found",
+            status :false 
+
         });
     }
 });
