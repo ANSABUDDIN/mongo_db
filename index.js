@@ -55,7 +55,7 @@ app.post('/kyc', async (req, resp) => {
    User.findOne({
         email: req.body.email,
         $set: {
-            phonenum:`035263213216`,
+            phonenum:`03353126655`,
         }
     }).then(()=>{
         resp.status(200).send({
@@ -67,7 +67,6 @@ app.post('/kyc', async (req, resp) => {
 
 
 });
-
 app.post('/login', async (req, resp) => {
     if (req.body.password && req.body.email) {
         let user = await User.findOne(req.body).select("-password")
@@ -90,8 +89,6 @@ app.post('/login', async (req, resp) => {
 
     }
 });
-
-
 app.post('/forget', async (req, resp) => {
     let data = await User.findOne({ email: req.body.email });
     if (data) {
