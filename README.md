@@ -6,4 +6,5 @@ node api with mongodb
 npm i
 
 //run server
+
 npm start
