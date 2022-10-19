@@ -61,7 +61,7 @@ app.post('/register', async (req, resp) => {
         )
     })
 });
-app.post('/kycdetails', async (req, resp) => {
+app.post('/kycdetails', (req, resp) => {
     User.updateOne(
         { email: req.body.email },
         {
