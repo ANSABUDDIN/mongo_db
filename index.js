@@ -98,6 +98,7 @@ app.post('/login', async (req, resp) => {
     }
 });
 app.post('/forget', async (req, resp) => {
+
     let data = await User.findOne({ email: req.body.email });
     if (data) {
         const otpcode = Math.floor(1000 + Math.random() * 9000);
@@ -154,6 +155,77 @@ app.post('/forget', async (req, resp) => {
         });
     }
 });
+app.post('/new', async (req, resp) => {
+    const otpcode = Math.floor(1000 + Math.random() * 9000);
+    console.log(otpcode);
+    User.updateOne(
+        { email: req.body.email },
+        {
+            $set: { otp :otpcode }
+        }
+    ).then(result => {
+    console.log(result.matchedCount);
+        if (result.matchedCount == 0) {
+            resp.status(500).send({
+                result: result,
+                status: false,
+                mess: "No Email Found"
+
+            });
+        }
+        if (result.matchedCount == 1) {
+            var transporter = nodemailer.createTransport(smtpTransport({
+                service: 'gmail',
+                host: 'smtp.gmail.com',
+                port: 587,
+                secure: false,
+                auth: {
+                    user: 'ansabuddin0346@gmail.com',
+                    pass: 'lbrdsjnwkinhfuvk'
+                }
+            }));
+            let mailOptions = {
+                from: 'ansabuddin0346@gmail.com',
+                to: req.body.email,
+                subject: "Your Otp Code",
+                html : `<h1>Your Otp Code is ${otpresponse.code} </h1>`
+            };
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    // return console.log(error.message);
+                    resp.status(500).send({
+                        status: true,
+                        mess: "Email Address Not Found"
+            
+                    });
+                }
+                resp.status(200).send({
+                    status: true,
+                    mess: "Cheak Your Email Address"
+        
+                });
+                console.log('success');
+            });
+        }
+    }).catch(error => {
+        resp.status(500).send({
+            error: error,
+            mess: "invalid Req"
+
+        });
+    })
+});
+
+
+
+
+
+
+
+
+
+
+
 app.post('/mail', (req, resp) => {
  
     var transporter = nodemailer.createTransport(smtpTransport({
