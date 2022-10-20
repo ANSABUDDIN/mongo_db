@@ -12,7 +12,7 @@ const otpSchema = new mongoose.Schema({
 },
     {
         timestamps: true,
-
+        // expireAfterSeconds: 60
     });
 
 

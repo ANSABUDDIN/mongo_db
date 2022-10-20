@@ -5,18 +5,16 @@ import './config.js';
 import User from './models/user.js';
 import Otp from './models/otp.js';
 import nodemailer from 'nodemailer';
+import smtpTransport from 'nodemailer-smtp-transport';
+import fs from 'fs';
 import pkg from 'bcryptjs';
-
 const app = express()
 // const { hashSync, genSaltSync, compareSync } = pkg;
 
 app.use(express.json())
 app.use(cors())
 
-app.get('/', (req, resp) => {
 
-    resp.send("node server is run");
-});
 app.post('/register', async (req, resp) => {
     const { username, email, password } = req.body
     const user = new User({
@@ -109,21 +107,92 @@ app.post('/forget', async (req, resp) => {
             expireIn: new Date().getTime() + 300 * 1000
         });
         let otpresponse = await otpdata.save();
-
+        var transporter = nodemailer.createTransport(smtpTransport({
+            service: 'gmail',
+            host: 'smtp.gmail.com',
+            port: 587,
+            secure: false,
+            auth: {
+                user: 'ansabuddin0346@gmail.com',
+                pass: 'lbrdsjnwkinhfuvk'
+            }
+        }));
+        let mailOptions = {
+            from: 'ansabuddin0346@gmail.com',
+            to: req.body.email,
+            subject: "Your Otp Code",
+            html : `<h1>Your Otp Code is ${otpresponse.code} </h1>`
+        };
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                // return console.log(error.message);
+                resp.status(500).send({
+                    status: true,
+                    mess: "Email Address Not Found"
+        
+                });
+            }
+            resp.status(200).send({
+                status: true,
+                mess: "Cheak Your Email Address"
+    
+            });
+            console.log('success');
+        });
         resp.status(200).send({
-            result: "Please Cheak Your Email Id",
-            status :true 
+            status: true,
+            mess: "Cheak Your Email Address"
 
         });
+        
 
     } else {
         resp.status(500).send({
             result: "Email Not Found",
-            status :false 
+            status: false
 
         });
     }
 });
+app.post('/mail', (req, resp) => {
+ 
+    var transporter = nodemailer.createTransport(smtpTransport({
+        service: 'gmail',
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
+        auth: {
+            user: 'ansabuddin0346@gmail.com',
+            pass: 'lbrdsjnwkinhfuvk'
+        }
+    }));
+    let mailOptions = {
+        from: 'ansabuddin0346@gmail.com',
+        to: req.body.email,
+        subject: "Your Otp Code",
+        text: '123456'
+    };
+    
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            // return console.log(error.message);
+            resp.status(500).send({
+                status: true,
+                mess: "Email Address Not Found"
+    
+            });
+        }
+        resp.status(200).send({
+            status: true,
+            mess: "Cheak Your Email Address"
+
+        });
+        console.log('success');
+    });
+    
+
+});
+
 
 
 // mailer fun
@@ -146,29 +215,7 @@ app.post('/forget', async (req, resp) => {
 // })
 
 
-const mymailer = () => {
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: 'ansabuddin0346gmail.com',
-            pass: 'alhouotwxqmxhcmw'
-        }
-    });
-    const mailOptions = {
-        from: 'ansabuddin0346gmail.com',
-        to: 'ansabuddin0346gmail.com',
-        subject: 'Subject',
-        text: 'Email content'
-    };
-    transporter.sendMail(mailOptions, function (error, info) {
-        if (error) {
-            console.log(error);
-        } else {
-            console.log('Email sent: ' + info.response);
-            // do something useful
-        }
-    });
-}
+
 
 
 const PORT = process.env.PORT || 5000;
