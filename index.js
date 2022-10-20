@@ -14,7 +14,75 @@ const app = express()
 app.use(express.json())
 app.use(cors())
 
+app.get('/', async (req, resp) => {
+    resp.status(200).json({
 
+        mess: "Node is Runing"
+
+    });
+});
+
+app.post('/forget', async (req, resp) => {
+
+    const deletedata = await Otp.deleteMany({ email: req.body.email })
+    if (deletedata) {
+        console.log(deletedata) 
+        let data = await User.findOne({ email: req.body.email });
+        if (data) {
+            const otpcode = Math.floor(1000 + Math.random() * 9000);
+            const otpdata = new Otp({
+                email: req.body.email,
+                code: otpcode,
+                expireIn: new Date().getTime() + 300 * 1000
+            });
+
+            let otpresponse = await otpdata.save();
+            var transporter = nodemailer.createTransport(smtpTransport({
+                service: 'gmail',
+                host: 'smtp.gmail.com',
+                port: 587,
+                secure: false,
+                auth: {
+                    user: 'ansabuddin0346@gmail.com',
+                    pass: 'lbrdsjnwkinhfuvk'
+                }
+            }));
+            let mailOptions = {
+                from: 'ansabuddin0346@gmail.com',
+                to: req.body.email,
+                subject: "Your Otp Code",
+                html: `<h1>Your Otp Code is ${otpresponse.code} </h1>`
+            };
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    return (
+                        resp.status(500).json({
+                            status: true,
+                            mess: "Email Address Not Found"
+
+                        })
+                    )
+                }
+
+                console.log('success');
+            });
+            resp.status(200).json({
+                status: true,
+                mess: "Cheak Your Email Address"
+
+            });
+
+
+        } else {
+            resp.status(500).json({
+                result: "Email Not Found",
+                status: false
+
+            });
+        }
+    }
+
+});
 app.post('/register', async (req, resp) => {
     const { username, email, password } = req.body
     const user = new User({
@@ -27,7 +95,7 @@ app.post('/register', async (req, resp) => {
         let email = data.email
         // const data_with_token = { email,
         //      token, code: 200 }
-        resp.status(200).send({
+        resp.status(200).json({
             token: token,
             email: email,
             status: true,
@@ -52,7 +120,7 @@ app.post('/kycdetails', (req, resp) => {
         }
     ).then(result => {
         if (result.matchedCount == 0) {
-            resp.status(500).send({
+            resp.status(500).json({
                 result: result,
                 status: false,
                 mess: "No Email Found"
@@ -60,7 +128,7 @@ app.post('/kycdetails', (req, resp) => {
             });
         }
         if (result.matchedCount == 1) {
-            resp.status(500).send({
+            resp.status(500).json({
                 result: result,
                 status: true,
                 mess: "user match"
@@ -68,7 +136,7 @@ app.post('/kycdetails', (req, resp) => {
             });
         }
     }).catch(error => {
-        resp.status(500).send({
+        resp.status(500).json({
             error: error,
             mess: "invalid Req"
 
@@ -82,139 +150,81 @@ app.post('/login', async (req, resp) => {
         // var passwordmatch = compareSync(req.body.password, user);
         const token = await Jwt.sign({ _user: req.body.email }, "thisisupcomingnftsecreatekeyitshouldlong")
         if (user) {
-            resp.status(200).send({
+            resp.status(200).json({
                 Email: user.email,
                 token: token,
                 status: true,
                 mess: "User Login"
             });
         } else {
-            resp.send({
+            resp.json({
                 result: "No User Found !"
             })
         }
     } else {
-        resp.send("Enter Email Or Password")
+        resp.json("Enter Email Or Password")
     }
 });
-app.post('/forget', async (req, resp) => {
 
-    let data = await User.findOne({ email: req.body.email });
-    if (data) {
-        const otpcode = Math.floor(1000 + Math.random() * 9000);
-        const otpdata = new Otp({
-            email: req.body.email,
-            code: otpcode,
-            expireIn: new Date().getTime() + 300 * 1000
-        });
-        let otpresponse = await otpdata.save();
-        var transporter = nodemailer.createTransport(smtpTransport({
-            service: 'gmail',
-            host: 'smtp.gmail.com',
-            port: 587,
-            secure: false,
-            auth: {
-                user: 'ansabuddin0346@gmail.com',
-                pass: 'lbrdsjnwkinhfuvk'
-            }
-        }));
-        let mailOptions = {
-            from: 'ansabuddin0346@gmail.com',
-            to: req.body.email,
-            subject: "Your Otp Code",
-            html : `<h1>Your Otp Code is ${otpresponse.code} </h1>`
-        };
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                // return console.log(error.message);
-                resp.status(500).send({
-                    status: true,
-                    mess: "Email Address Not Found"
-        
-                });
-            }
-            resp.status(200).send({
-                status: true,
-                mess: "Cheak Your Email Address"
-    
-            });
-            console.log('success');
-        });
-        resp.status(200).send({
-            status: true,
-            mess: "Cheak Your Email Address"
 
-        });
-        
 
-    } else {
-        resp.status(500).send({
-            result: "Email Not Found",
-            status: false
+// app.post('/forget', async (req, resp) => {
 
-        });
-    }
-});
-app.post('/new', async (req, resp) => {
-    const otpcode = Math.floor(1000 + Math.random() * 9000);
-    console.log(otpcode);
-    User.updateOne(
-        { email: req.body.email },
-        {
-            $set: { otp :otpcode }
-        }
-    ).then(result => {
-    console.log(result.matchedCount);
-        if (result.matchedCount == 0) {
-            resp.status(500).send({
-                result: result,
-                status: false,
-                mess: "No Email Found"
+//     let data = await User.findOne({ email: req.body.email });
+//     if (data) {
+//         const otpcode = Math.floor(1000 + Math.random() * 9000);
+//         const otpdata = new Otp({
+//             email: req.body.email,
+//             code: otpcode,
+//             expireIn: new Date().getTime() + 300 * 1000
+//         });
 
-            });
-        }
-        if (result.matchedCount == 1) {
-            var transporter = nodemailer.createTransport(smtpTransport({
-                service: 'gmail',
-                host: 'smtp.gmail.com',
-                port: 587,
-                secure: false,
-                auth: {
-                    user: 'ansabuddin0346@gmail.com',
-                    pass: 'lbrdsjnwkinhfuvk'
-                }
-            }));
-            let mailOptions = {
-                from: 'ansabuddin0346@gmail.com',
-                to: req.body.email,
-                subject: "Your Otp Code",
-                html : `<h1>Your Otp Code is ${otpresponse.code} </h1>`
-            };
-            transporter.sendMail(mailOptions, (error, info) => {
-                if (error) {
-                    // return console.log(error.message);
-                    resp.status(500).send({
-                        status: true,
-                        mess: "Email Address Not Found"
-            
-                    });
-                }
-                resp.status(200).send({
-                    status: true,
-                    mess: "Cheak Your Email Address"
-        
-                });
-                console.log('success');
-            });
-        }
-    }).catch(error => {
-        resp.status(500).send({
-            error: error,
-            mess: "invalid Req"
+//         let otpresponse = await otpdata.save();
+//         var transporter = nodemailer.createTransport(smtpTransport({
+//             service: 'gmail',
+//             host: 'smtp.gmail.com',
+//             port: 587,
+//             secure: false,
+//             auth: {
+//                 user: 'ansabuddin0346@gmail.com',
+//                 pass: 'lbrdsjnwkinhfuvk'
+//             }
+//         }));
+//         let mailOptions = {
+//             from: 'ansabuddin0346@gmail.com',
+//             to: req.body.email,
+//             subject: "Your Otp Code",
+//             html: `<h1>Your Otp Code is ${otpresponse.code} </h1>`
+//         };
+//         transporter.sendMail(mailOptions, (error, info) => {
+//             if (error) {
+//                 return (
+//                     resp.status(500).json({
+//                         status: true,
+//                         mess: "Email Address Not Found"
 
-        });
-    })
-});
+//                     })
+//                 )
+//             }
+
+//             console.log('success');
+//         });
+//         resp.status(200).json({
+//             status: true,
+//             mess: "Cheak Your Email Address"
+
+//         });
+
+
+//     } else {
+//         resp.status(500).json({
+//             result: "Email Not Found",
+//             status: false
+
+//         });
+//     }
+// });
+
 
 
 
@@ -227,7 +237,7 @@ app.post('/new', async (req, resp) => {
 
 
 app.post('/mail', (req, resp) => {
- 
+
     var transporter = nodemailer.createTransport(smtpTransport({
         service: 'gmail',
         host: 'smtp.gmail.com',
@@ -244,14 +254,14 @@ app.post('/mail', (req, resp) => {
         subject: "Your Otp Code",
         text: '123456'
     };
-    
+
     transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
             // return console.log(error.message);
             resp.status(500).send({
                 status: true,
                 mess: "Email Address Not Found"
-    
+
             });
         }
         resp.status(200).send({
@@ -261,7 +271,7 @@ app.post('/mail', (req, resp) => {
         });
         console.log('success');
     });
-    
+
 
 });
 
