@@ -21,9 +21,7 @@ app.get('/', async (req, resp) => {
 
     });
 });
-
 app.post('/forget', async (req, resp) => {
-
     const deletedata = await Otp.deleteMany({ email: req.body.email })
     if (deletedata) {
         console.log(deletedata) 
@@ -80,6 +78,12 @@ app.post('/forget', async (req, resp) => {
 
             });
         }
+    }else{
+        resp.status(500).json({
+            result: "Email Not Found",
+            status: false
+
+        });
     }
 
 });
