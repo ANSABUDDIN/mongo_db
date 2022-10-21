@@ -7,19 +7,19 @@ import Otp from './models/otp.js';
 import nodemailer from 'nodemailer';
 import smtpTransport from 'nodemailer-smtp-transport';
 import passport from 'passport';
-import './passport.js';
+// import './passport.js';
 import cookieSession from 'cookie-session';
 
 
 const app = express();
 app.use(express.json());
 app.use(cors());
-app.use(cookieSession({
-    name: 'google-auth-session',
-    keys: ['key1', 'key2']
-}));
-app.use(passport.initialize());
-app.use(passport.session());
+// app.use(cookieSession({
+//     name: 'google-auth-session',
+//     keys: ['key1', 'key2']
+// }));
+// app.use(passport.initialize());
+// app.use(passport.session());
 
 
 
@@ -30,35 +30,14 @@ app.get('/', async (req, resp) => {
     resp.send("hello node is live")
 });
 
-app.get('/auth', passport.authenticate('google', {
-    scope:
-        ['email', 'profile']
-}));
+
 
 // google auth 
 
 // Auth Callback
-app.get( '/auth/callback',
-    passport.authenticate( 'google', {
-        successRedirect: '/auth/callback/success',
-        failureRedirect: '/auth/callback/failure'
-}));
+
   
-// Success 
-app.get('/auth/callback/success' , (req , res) => {
-    if(!req.user)
-        res.redirect('/auth/callback/failure');
-    res.send("Welcome " + req.user.email);
-});
-  
-// failure
-app.get('/auth/callback/failure' , (req , res) => {
-    res.send("Error");
-})
-  
-app.listen(4000 , () => {
-    console.log("Server Running on port 4000");
-});
+
 // google auth
 
 
@@ -224,7 +203,7 @@ app.post('/getotp', (req, resp) => {
         secure: false,
         auth: {
             user: 'ansabuddin0346@gmail.com',
-            pass: 'lbrdsjnwkinhfuvk'
+            pass: 'ltcpfwhubjdepekw'
         }
     }));
     let mailOptions = {
@@ -253,12 +232,12 @@ app.post('/getotp', (req, resp) => {
 
 
 });
-app.post('/google-auth', (req, resp) => {
-    resp.status(200).send({
-        mess: "Google Auth Is Run"
-    })
+// app.post('/google-auth', (req, resp) => {
+//     resp.status(200).send({
+//         mess: "Google Auth Is Run"
+//     })
 
-})
+// })
 
 
 
