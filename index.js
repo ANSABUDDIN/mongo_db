@@ -88,7 +88,7 @@ app.post('/forget', async (req, resp) => {
                 secure: false,
                 auth: {
                     user: 'ansabuddin0346@gmail.com',
-                    pass: 'lbrdsjnwkinhfuvk'
+                    pass: 'ltcpfwhubjdepekw'
                 }
             }));
             let mailOptions = {
