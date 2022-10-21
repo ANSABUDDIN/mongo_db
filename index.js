@@ -94,8 +94,6 @@ app.post('/forget', async (req, resp) => {
                 mess: "Cheak Your Email Address"
 
             });
-
-
         } else {
             resp.status(500).json({
                 result: "Email Not Found",
@@ -110,7 +108,6 @@ app.post('/forget', async (req, resp) => {
 
         });
     }
-
 });
 app.post('/register', async (req, resp) => {
     const { username, email, password } = req.body
@@ -153,6 +150,37 @@ app.post('/kycdetails', (req, resp) => {
                 result: result,
                 status: false,
                 mess: "No Email Found"
+
+            });
+        }
+        if (result.matchedCount == 1) {
+            resp.status(500).json({
+                result: result,
+                status: true,
+                mess: "user match"
+
+            });
+        }
+    }).catch(error => {
+        resp.status(500).json({
+            error: error,
+            mess: "invalid Req"
+
+        });
+    })
+});
+app.post('/changepassword', (req, resp) => {
+    User.updateOne(
+        { code: req.body.code },
+        {
+            $set: { password: req.body.password}
+        }
+    ).then(result => {
+        if (result.matchedCount == 0) {
+            resp.status(500).json({
+                result: result,
+                status: false,
+                mess: "No otp Found"
 
             });
         }
