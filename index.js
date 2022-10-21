@@ -23,7 +23,6 @@ app.use(cors());
 
 
 app.post('/changepassword', async (req, resp) => {
-
     const otpcheak = await Otp.findOne({ code: req.body.code });
     // console.log(otpcheak.email);
     if (otpcheak) {
@@ -57,20 +56,10 @@ app.post('/changepassword', async (req, resp) => {
     }
 
 });
-
-
 app.get('/', async (req, resp) => {
     // resp.send("<button><a href='/auth'>Login With Google</a></button>")
     resp.send("hello node is live")
 });
-// google auth 
-
-// Auth Callback
-
-// google auth
-
-// app api
-
 app.post('/forget', async (req, resp) => {
     const deletedata = await Otp.deleteMany({ email: req.body.email })
     if (deletedata) {
