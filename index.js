@@ -36,8 +36,6 @@ app.get('/', async (req, resp) => {
 
 // Auth Callback
 
-  
-
 // google auth
 
 
@@ -170,35 +168,74 @@ app.post('/kycdetails', (req, resp) => {
     })
 });
 app.post('/changepassword', (req, resp) => {
-    User.updateOne(
-        { code: req.body.code },
-        {
-            $set: { password: req.body.password}
+    const emailcheak = User.findOne({ email: req.body.email });
+    const otpcheak = Otp.findOne({ code: req.body.code }, { email: req.body.email });
+    if (!emailcheak) {
+        console.log("user not found")
+    } else {
+        if (!otpcheak) {
+            console.log("otp not match")
+        }else{
+            User.updateOne({ email: req.body.email},
+                {
+                    $set: { password: req.body.password }
+                }
+                
+                ).then(result => {
+                    if (result.matchedCount == 0) {
+                        resp.status(500).json({
+                            result: result,
+                            status: false,
+                            mess: "No otp Found"
+            
+                        });
+                    }
+                    if (result.matchedCount == 1) {
+                        resp.status(500).json({
+                            result: result,
+                            status: true,
+                            mess: "user match"
+            
+                        });
+                    }
+                }).catch(error => {
+                    resp.status(500).json({
+                        error: error,
+                        mess: "invalid Req"
+            
+                    });
+                })
         }
-    ).then(result => {
-        if (result.matchedCount == 0) {
-            resp.status(500).json({
-                result: result,
-                status: false,
-                mess: "No otp Found"
+    }
+    // User.updateOne(
+    //     { code: req.body.code },
+    //     {
+    //         $set: { password: req.body.password }
+    //     }
+    // ).then(result => {
+    //     if (result.matchedCount == 0) {
+    //         resp.status(500).json({
+    //             result: result,
+    //             status: false,
+    //             mess: "No otp Found"
 
-            });
-        }
-        if (result.matchedCount == 1) {
-            resp.status(500).json({
-                result: result,
-                status: true,
-                mess: "user match"
+    //         });
+    //     }
+    //     if (result.matchedCount == 1) {
+    //         resp.status(500).json({
+    //             result: result,
+    //             status: true,
+    //             mess: "user match"
 
-            });
-        }
-    }).catch(error => {
-        resp.status(500).json({
-            error: error,
-            mess: "invalid Req"
+    //         });
+    //     }
+    // }).catch(error => {
+    //     resp.status(500).json({
+    //         error: error,
+    //         mess: "invalid Req"
 
-        });
-    })
+    //     });
+    // })
 });
 app.post('/login', async (req, resp) => {
     if (req.body.password && req.body.email) {
