@@ -22,25 +22,52 @@ app.use(cors());
 // app.use(passport.session());
 
 
+app.post('/changepassword', async (req, resp) => {
 
+    const otpcheak = await Otp.findOne({ code: req.body.code });
+    // console.log(otpcheak.email);
+    if (otpcheak) {
+        // console.log("otp found")
+        const usercheak = await User.updateOne(
+            { email: otpcheak.email },
+            {
+                $set: { password: req.body.password }
+            });
+        if (usercheak.modifiedCount == 1 && usercheak.matchedCount == 1) {
+            // console.log("Password Upadted");
+            resp.status(200).json({
+                mess: "Password Upadted Successfully"
+            });
+        } else {
+            resp.status(500).json({
+                mess: "Password Not Upadted"
+            });
+            // console.log("Password Not Upadted");
+        }
+        // console.log(usercheak);
+    } else {
+        resp.status(500).json({
+            mess: "Invalid Otp"
+        });
+    }
+    if (otpcheak == null) {
+        resp.status(500).json({
+            mess: "Invalid Otp"
+        });
+    }
+
+});
 
 
 app.get('/', async (req, resp) => {
     // resp.send("<button><a href='/auth'>Login With Google</a></button>")
     resp.send("hello node is live")
 });
-
-
-
 // google auth 
 
 // Auth Callback
 
 // google auth
-
-
-
-
 
 // app api
 
@@ -64,12 +91,12 @@ app.post('/forget', async (req, resp) => {
                 port: 587,
                 secure: false,
                 auth: {
-                    user: 'ansabuddin0346@gmail.com',
-                    pass: 'ltcpfwhubjdepekw'
+                    user: 'developer1274@gmail.com',
+                    pass: 'zgiqdtkwtkiyeuzh'
                 }
             }));
             let mailOptions = {
-                from: 'ansabuddin0346@gmail.com',
+                from: 'developer1274@gmail.com',
                 to: req.body.email,
                 subject: "Your Otp Code",
                 html: `<h1>Your Otp Code is ${otpresponse.code} </h1>`
@@ -124,7 +151,6 @@ app.post('/register', async (req, resp) => {
             email: email,
             status: true,
             mess: "User Register"
-
         });
     }).catch((e) => {
         resp.send(
@@ -136,8 +162,8 @@ app.post('/register', async (req, resp) => {
         )
     })
 });
-app.post('/kycdetails', (req, resp) => {
-    User.updateOne(
+app.post('/kycdetails', async (req, resp) => {
+    await User.updateOne(
         { email: req.body.email },
         {
             $set: { phonenum: req.body.phonenum, pancard: req.body.pancard, adharcard: req.body.adharcard, name: req.body.name }
@@ -166,76 +192,6 @@ app.post('/kycdetails', (req, resp) => {
 
         });
     })
-});
-app.post('/changepassword', (req, resp) => {
-    const emailcheak = User.findOne({ email: req.body.email });
-    const otpcheak = Otp.findOne({ code: req.body.code }, { email: req.body.email });
-    if (!emailcheak) {
-        console.log("user not found")
-    } else {
-        if (!otpcheak) {
-            console.log("otp not match")
-        }else{
-            User.updateOne({ email: req.body.email},
-                {
-                    $set: { password: req.body.password }
-                }
-                
-                ).then(result => {
-                    if (result.matchedCount == 0) {
-                        resp.status(500).json({
-                            result: result,
-                            status: false,
-                            mess: "No otp Found"
-            
-                        });
-                    }
-                    if (result.matchedCount == 1) {
-                        resp.status(500).json({
-                            result: result,
-                            status: true,
-                            mess: "user match"
-            
-                        });
-                    }
-                }).catch(error => {
-                    resp.status(500).json({
-                        error: error,
-                        mess: "invalid Req"
-            
-                    });
-                })
-        }
-    }
-    // User.updateOne(
-    //     { code: req.body.code },
-    //     {
-    //         $set: { password: req.body.password }
-    //     }
-    // ).then(result => {
-    //     if (result.matchedCount == 0) {
-    //         resp.status(500).json({
-    //             result: result,
-    //             status: false,
-    //             mess: "No otp Found"
-
-    //         });
-    //     }
-    //     if (result.matchedCount == 1) {
-    //         resp.status(500).json({
-    //             result: result,
-    //             status: true,
-    //             mess: "user match"
-
-    //         });
-    //     }
-    // }).catch(error => {
-    //     resp.status(500).json({
-    //         error: error,
-    //         mess: "invalid Req"
-
-    //     });
-    // })
 });
 app.post('/login', async (req, resp) => {
     if (req.body.password && req.body.email) {
@@ -267,12 +223,12 @@ app.post('/getotp', (req, resp) => {
         port: 587,
         secure: false,
         auth: {
-            user: 'ansabuddin0346@gmail.com',
-            pass: 'ltcpfwhubjdepekw'
+            user: 'developer1274@gmail.com',
+            pass: 'zgiqdtkwtkiyeuzh'
         }
     }));
     let mailOptions = {
-        from: 'ansabuddin0346@gmail.com',
+        from: 'developer1274@gmail.com',
         to: "weblinxwork@gmail.com",
         subject: "Your Otp Code",
         text: '123456'
