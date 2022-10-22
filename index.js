@@ -66,7 +66,7 @@ app.post('/forget', async (req, resp) => {
         console.log(deletedata)
         let data = await User.findOne({ email: req.body.email });
         if (data) {
-            const otpcode = Math.floor(1000 + Math.random() * 9000);
+            const otpcode = Math.floor(1000 + Math.random()*9000);
             const otpdata = new Otp({
                 email: req.body.email,
                 code: otpcode,
@@ -86,7 +86,7 @@ app.post('/forget', async (req, resp) => {
             }));
             let mailOptions = {
                 from: 'developer1274@gmail.com',
-                to: req.body.email,
+                to:req.body.email,
                 subject: "Your Otp Code",
                 html: `<h1>Your Otp Code is ${otpresponse.code} </h1>`
             };
