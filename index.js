@@ -35,10 +35,12 @@ app.post('/changepassword', async (req, resp) => {
         if (usercheak.modifiedCount == 1 && usercheak.matchedCount == 1) {
             // console.log("Password Upadted");
             resp.status(200).json({
+                status: true,
                 mess: "Password Upadted Successfully"
             });
         } else {
             resp.status(500).json({
+                status: false,
                 mess: "Password Not Upadted"
             });
             // console.log("Password Not Upadted");
@@ -46,6 +48,7 @@ app.post('/changepassword', async (req, resp) => {
         // console.log(usercheak);
     } else {
         resp.status(500).json({
+            status: false,
             mess: "Invalid Otp"
         });
     }
@@ -66,7 +69,7 @@ app.post('/forget', async (req, resp) => {
         console.log(deletedata)
         let data = await User.findOne({ email: req.body.email });
         if (data) {
-            const otpcode = Math.floor(1000 + Math.random()*9000);
+            const otpcode = Math.floor(1000 + Math.random() * 9000);
             const otpdata = new Otp({
                 email: req.body.email,
                 code: otpcode,
@@ -86,7 +89,7 @@ app.post('/forget', async (req, resp) => {
             }));
             let mailOptions = {
                 from: 'developer1274@gmail.com',
-                to:req.body.email,
+                to: req.body.email,
                 subject: "Your Otp Code",
                 html: `<h1>Your Otp Code is ${otpresponse.code} </h1>`
             };
