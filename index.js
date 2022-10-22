@@ -6,59 +6,14 @@ import User from './models/user.js';
 import Otp from './models/otp.js';
 import nodemailer from 'nodemailer';
 import smtpTransport from 'nodemailer-smtp-transport';
-import passport from 'passport';
-// import './passport.js';
-import cookieSession from 'cookie-session';
-
 
 const app = express();
 app.use(express.json());
 app.use(cors());
-// app.use(cookieSession({
-//     name: 'google-auth-session',
-//     keys: ['key1', 'key2']
-// }));
-// app.use(passport.initialize());
-// app.use(passport.session());
 
 
-app.post('/changepassword', async (req, resp) => {
-    const otpcheak = await Otp.findOne({ code: req.body.code });
-    // console.log(otpcheak.email);
-    if (otpcheak) {
-        // console.log("otp found")
-        const usercheak = await User.updateOne(
-            { email: otpcheak.email },
-            {
-                $set: { password: req.body.password }
-            });
-        if (usercheak.modifiedCount == 1 && usercheak.matchedCount == 1) {
-            // console.log("Password Upadted");
-            resp.status(200).json({
-                status: true,
-                mess: "Password Upadted Successfully"
-            });
-        } else {
-            resp.status(500).json({
-                status: false,
-                mess: "Password Not Upadted"
-            });
-            // console.log("Password Not Upadted");
-        }
-        // console.log(usercheak);
-    } else {
-        resp.status(500).json({
-            status: false,
-            mess: "Invalid Otp"
-        });
-    }
-    if (otpcheak == null) {
-        resp.status(500).json({
-            mess: "Invalid Otp"
-        });
-    }
 
-});
+
 app.get('/', async (req, resp) => {
     // resp.send("<button><a href='/auth'>Login With Google</a></button>")
     resp.send("hello node is live")
@@ -155,35 +110,64 @@ app.post('/register', async (req, resp) => {
     })
 });
 app.post('/kycdetails', async (req, resp) => {
-    await User.updateOne(
+    const usercheak = await User.updateOne(
         { email: req.body.email },
         {
             $set: { phonenum: req.body.phonenum, pancard: req.body.pancard, adharcard: req.body.adharcard, name: req.body.name }
         }
-    ).then(result => {
-        if (result.matchedCount == 0) {
-            resp.status(500).json({
-                result: result,
-                status: false,
-                mess: "No Email Found"
+    )
 
-            });
-        }
-        if (result.matchedCount == 1) {
-            resp.status(500).json({
-                result: result,
+    if (usercheak.matchedCount == 1) {
+        if (usercheak.modifiedCount == 1) {
+            resp.status(200).json({
                 status: true,
-                mess: "user match"
-
+                mess: "Data is submit"
+            });
+        } else {
+            resp.status(500).json({
+                status: true,
+                mess: "Data is not submit"
             });
         }
-    }).catch(error => {
-        resp.status(500).json({
-            error: error,
-            mess: "invalid Req"
 
+    } else {
+        resp.status(200).json({
+            status: true,
+            mess: "Email Not  Found"
         });
-    })
+    }
+
+
+
+    // await User.updateOne(
+    //     { email: req.body.email },
+    //     {
+    //         $set: { phonenum: req.body.phonenum, pancard: req.body.pancard, adharcard: req.body.adharcard, name: req.body.name }
+    //     }
+    // ).then(result => {
+    //     if (result.matchedCount == 0) {
+    //         resp.status(500).json({
+    //             result: result,
+    //             status: false,
+    //             mess: "No Email Found"
+
+    //         });
+    //     }
+    //     if (result.matchedCount == 1) {
+    //         resp.status(500).json({
+    //             result: result,
+    //             status: true,
+    //             mess: "user match"
+
+    //         });
+    //     }
+    // }).catch(error => {
+    //     resp.status(500).json({
+    //         error: error,
+    //         mess: "invalid Req"
+
+    //     });
+    // })
 });
 app.post('/login', async (req, resp) => {
     if (req.body.password && req.body.email) {
@@ -245,6 +229,7 @@ app.post('/getotp', (req, resp) => {
 
 
 });
+
 // app.post('/google-auth', (req, resp) => {
 //     resp.status(200).send({
 //         mess: "Google Auth Is Run"
